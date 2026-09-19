@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La San Cristóbalense | Pedidos por WhatsApp</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-amber-50 text-slate-800 font-sans pb-24">
+
+    <!-- Header / Navbar -->
+    <header class="bg-amber-700 text-white shadow-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide"><i class="fa-solid fa-bread-slice mr-2"></i>La San Cristóbalence</h1>
+                <p class="text-xs text-amber-200">Un rincón de Táchira en tu ciudad</p>
+            </div>
+            <div class="flex items-center space-x-3">
+                <!-- Botón Admin -->
+                <button onclick="openAdminLogin()" class="bg-amber-800 hover:bg-amber-900 text-white px-3 py-2 rounded-full text-xs flex items-center shadow transition" title="Panel Admin">
+                    <i class="fa-solid fa-lock mr-1"></i> Admin
+                </button>
+                <!-- Botón del Carrito -->
+                <button onclick="toggleCart()" class="bg-amber-600 hover:bg-amber-800 text-white px-4 py-2 rounded-full flex items-center shadow transition relative">
+                    <i class="fa-solid fa-cart-shopping mr-2"></i>
+                    <span>Carrito</span>
+                    <span id="cart-counter" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenido Principal: Catálogo -->
+    <main class="max-w-6xl mx-auto px-4 py-8">
+        <div class="text-center mb-10">
+            <h2 class="text-3xl font-extrabold text-amber-900 mb-2">Haz tu pedido fácil y rápido</h2>
+            <p class="text-slate-600">Selecciona tus productos favoritos, armalo y envíalo directo a nuestro WhatsApp.</p>
+        </div>
+
+        <!-- Filtros de Categorías -->
+        <div class="flex justify-center gap-2 mb-8 flex-wrap" id="category-filters">
+            <button onclick="filterCategory('todos')" class="cat-btn bg-amber-700 text-white px-4 py-2 rounded-full text-sm font-semibold shadow transition">Todos</button>
+            <button onclick="filterCategory('panaderia')" class="cat-btn bg-white text-amber-800 border border-amber-300 px-4 py-2 rounded-full text-sm font-semibold shadow-sm hover:bg-amber-100 transition">Panadería</button>
+            <button onclick="filterCategory('pasteleria')" class="cat-btn bg-white text-amber-800 border border-amber-300 px-4 py-2 rounded-full text-sm font-semibold shadow-sm hover:bg-amber-100 transition">Pastelería</button>
+            <button onclick="filterCategory('antojos')" class="cat-btn bg-white text-amber-800 border border-amber-300 px-4 py-2 rounded-full text-sm font-semibold shadow-sm hover:bg-amber-100 transition">Especiales & Antojos</button>
+        </div>
+
+        <!-- Grid de Productos -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Se inyecta dinámicamente vía JS -->
+        </div>
+    </main>
+
+    <!-- Modal / Panel del Carrito Flotante -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
+            <div>
+                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                    <h3 class="text-xl font-bold text-amber-900"><i class="fa-solid fa-basket-shopping mr-2"></i>Tu Pedido</h3>
+                    <button onclick="toggleCart()" class="text-slate-400 hover:text-slate-700 text-xl font-bold">&times;</button>
+                </div>
+                <!-- Lista de items en el carrito -->
+                <div id="cart-items" class="space-y-4 mb-6">
+                    <p class="text-slate-500 text-center py-8">Tu carrito está vacío</p>
+                </div>
+            </div>
+
+            <!-- Resumen y Formulario de Envío -->
+            <div class="border-t pt-4 space-y-4">
+                <div class="flex justify-between text-lg font-bold text-slate-800">
+                    <span>Total:</span>
+                    <span id="cart-total" class="text-amber-700">$0.00</span>
+                </div>
+
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre y Apellido</label>
+                        <input type="text" id="client-name" placeholder="Ej. María Pérez" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Método de Entrega</label>
+                        <select id="delivery-method" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
+                            <option value="Retiro en Tienda">Retiro en Tienda (San José de Guanipa)</option>
+                            <option value="Delivery a Domicilio">Delivery a Domicilio</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Dirección o Referencia (si pide delivery)</label>
+                        <input type="text" id="client-address" placeholder="Ej. Sector Central, Calle 5" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Método de Pago</label>
+                        <select id="payment-method" class="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-600">
+                            <option value="Pago Móvil">Pago Móvil</option>
+                            <option value="Efectivo ($)">Efectivo ($)</option>
+                            <option value="Zelle">Zelle</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button onclick="sendWhatsAppOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center">
+                    <i class="fa-brands fa-whatsapp text-xl mr-2"></i> Enviar Pedido por WhatsApp
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL PANEL DE ADMINISTRACIÓN -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-amber-900 text-white p-4 flex justify-between items-center">
+                <h3 class="font-bold text-lg"><i class="fa-solid fa-screwdriver-wrench mr-2"></i>Panel de Administración - La San Cristóbalence</h3>
+                <button onclick="closeAdmin()" class="text-white text-xl font-bold">&times;</button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-6 flex-1">
+                <!-- Formulario para Agregar/Editar Producto -->
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                    <h4 class="font-bold text-amber-900 mb-3" id="admin-form-title">Agregar Nuevo Producto</h4>
+                    <input type="hidden" id="edit-product-id">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre del producto</label>
+                            <input type="text" id="prod-name" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Precio ($)</label>
+                            <input type="number" step="0.01" id="prod-price" class="w-full border rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Categoría</label>
+                            <select id="prod-cat" class="w-full border rounded-lg px-3 py-2 text-sm">
+                                <option value="panaderia">Panadería</option>
+                                <option value="pasteleria">Pastelería</option>
+                                <option value="antojos">Especiales & Antojos</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">URL de la Imagen</label>
+                            <input type="text" id="prod-img" placeholder="https://..." class="w-full border rounded-lg px-3 py-2 text-sm">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Descripción corta</label>
+                        <input type="text" id="prod-desc" class="w-full border rounded-lg px-3 py-2 text-sm">
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="saveProduct()" class="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-lg text-sm font-bold shadow">Guardar Producto</button>
+                        <button onclick="resetAdminForm()" class="bg-slate-300 hover:bg-slate-400 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Lista de productos actuales -->
+                <div>
+                    <h4 class="font-bold text-slate-800 mb-2">Productos en el Sistema</h4>
+                    <div id="admin-products-list" class="space-y-2">
+                        <!-- Se llena con JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts locales obligatorios -->
+    <script src="productos.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
