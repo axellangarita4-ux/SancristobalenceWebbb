@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>La San Cristóbalense - Panadería y Pastelería</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-amber-50 text-slate-800 font-sans pb-24">
+
+    <!-- HEADER / NAVEGACIÓN -->
+    <header class="bg-amber-900 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 grid grid-cols-3 items-center">
+            <!-- Espacio izquierdo vacío para equilibrar -->
+            <div></div>
+
+            <!-- Centro: Nombre, Eslogan y Logo -->
+            <div class="flex flex-col items-center justify-center text-center">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-bread-slice text-xl text-amber-300"></i>
+                    <h1 class="text-sm sm:text-base md:text-lg font-black tracking-wider whitespace-nowrap">Panadería La San Cristóbalence C.A.</h1>
+                </div>
+                <span class="text-[10px] sm:text-xs text-amber-200 italic tracking-wide font-medium mt-0.5">un rincón andino en tu ciudad</span>
+            </div>
+
+            <!-- Derecha: Botón de Carrito (Admin oculto, accesible por Ctrl + Alt + A) -->
+            <div class="flex items-center justify-end space-x-2">
+                <button onclick="toggleCart()" class="bg-amber-700 hover:bg-amber-600 px-3 py-2 rounded-xl text-sm font-bold shadow flex items-center transition relative">
+                    <i class="fa-solid fa-cart-shopping mr-1"></i> <span class="hidden sm:inline">Carrito</span>
+                    <span id="cart-counter" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 rounded-full flex items-center justify-center shadow">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER PRINCIPAL -->
+    <section class="bg-gradient-to-r from-amber-900 to-amber-800 text-white py-12 px-4 text-center">
+        <div class="max-w-3xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-black mb-3">¡El mejor sabor de la ciudad a un clic!</h2>
+            <p class="text-amber-200 text-sm md:text-base">Haz tu pedido directamente por WhatsApp y recíbelo en la puerta de tu casa.</p>
+        </div>
+    </section>
+
+    <!-- FILTROS DE CATEGORÍA DINÁMICOS -->
+    <div id="category-filters" class="max-w-6xl mx-auto px-4 mt-6 flex overflow-x-auto space-x-2 pb-2">
+        <!-- Los botones de filtro se generan automáticamente -->
+    </div>
+
+    <!-- CATÁLOGO DE PRODUCTOS -->
+    <main class="max-w-6xl mx-auto px-4 mt-6">
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Los productos se cargan dinámicamente aquí -->
+        </div>
+    </main>
+
+    <!-- MODAL DEL CARRITO / CHECKOUT WHATSAPP -->
+    <div id="cart-modal" class="fixed inset-0 bg-black/50 hidden z-50 flex justify-end">
+        <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col justify-between p-6 overflow-y-auto">
+            <div>
+                <div class="flex justify-between items-center border-b pb-4 mb-4">
+                    <h3 class="text-lg font-black text-slate-800"><i class="fa-solid fa-cart-shopping mr-2 text-amber-700"></i>Tu Pedido</h3>
+                    <button onclick="toggleCart()" class="text-slate-400 hover:text-slate-700 font-bold text-lg"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                
+                <div id="cart-items" class="space-y-3 mb-4">
+                    <!-- Items del carrito -->
+                </div>
+            </div>
+
+            <div class="border-t pt-4 space-y-3">
+                <div class="flex justify-between items-center text-lg font-black">
+                    <span>Total:</span>
+                    <span id="cart-total" class="text-amber-900">$0.00</span>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs font-bold text-slate-700">Nombre y Apellido:</label>
+                    <input type="text" id="client-name" placeholder="Ej. Juan Pérez" class="w-full p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-700">
+
+                    <label class="text-xs font-bold text-slate-700">Método de Entrega:</label>
+                    <select id="delivery-method" onchange="toggleAddress()" class="w-full p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        <option value="Retiro en Tienda">Retiro en Tienda</option>
+                        <option value="Delivery a Domicilio">Delivery a Domicilio</option>
+                    </select>
+
+                    <div id="address-container" class="hidden">
+                        <label class="text-xs font-bold text-slate-700">Dirección de entrega:</label>
+                        <input type="text" id="client-address" placeholder="Calle, sector, referencia..." class="w-full p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-700">
+                    </div>
+
+                    <label class="text-xs font-bold text-slate-700">Método de Pago:</label>
+                    <select id="payment-method" class="w-full p-2.5 border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-700">
+                        <option value="Pago Móvil / Transferencia">Pago Móvil / Transferencia</option>
+                        <option value="Efectivo (Divisas)">Efectivo (Divisas)</option>
+                        <option value="Efectivo (Bolívares)">Efectivo (Bolívares)</option>
+                    </select>
+                </div>
+
+                <button onclick="sendWhatsAppOrder()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+                    <i class="fa-brands fa-whatsapp text-xl"></i>
+                    <span>Enviar pedido por WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE ADMINISTRACIÓN -->
+    <div id="admin-modal" class="fixed inset-0 bg-black/60 hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+            <div class="bg-amber-900 text-white p-4 flex justify-between items-center">
+                <h3 class="font-black text-lg"><i class="fa-solid fa-screwdriver-wrench mr-2"></i>Panel de Administración</h3>
+                <button onclick="closeAdmin()" class="text-white hover:text-amber-200 font-bold text-lg"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <div class="p-6 overflow-y-auto space-y-6">
+                <!-- Formulario de Producto -->
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-200">
+                    <h4 id="admin-form-title" class="font-bold text-sm text-amber-900 mb-3">Agregar Nuevo Producto</h4>
+                    <input type="hidden" id="edit-product-id">
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <input type="text" id="prod-name" placeholder="Nombre del producto" class="p-2.5 border rounded-xl text-sm bg-white">
+                        <input type="number" step="0.01" id="prod-price" placeholder="Precio ($)" class="p-2.5 border rounded-xl text-sm bg-white">
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <input type="text" id="prod-cat" placeholder="Categoría (ej. panes, tortas)" class="p-2.5 border rounded-xl text-sm bg-white uppercase">
+                        
+                        <!-- Selector de archivo desde la PC -->
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 block mb-1">Foto desde tu PC (Opcional):</label>
+                            <input type="file" id="prod-img-file" accept="image/*" class="w-full text-xs text-slate-500 file:mr-2 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-amber-700 file:text-white hover:file:bg-amber-800 cursor-pointer">
+                        </div>
+                    </div>
+
+                    <textarea id="prod-desc" placeholder="Breve descripción..." class="w-full p-2.5 border rounded-xl text-sm bg-white mb-3"></textarea>
+
+                    <div class="flex space-x-2">
+                        <button onclick="saveProduct()" class="bg-amber-700 hover:bg-amber-800 text-white px-4 py-2 rounded-xl text-sm font-bold shadow transition">Guardar Producto</button>
+                        <button onclick="resetAdminForm()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-bold transition">Cancelar</button>
+                    </div>
+                </div>
+
+                <!-- Lista de Productos en el Admin -->
+                <div>
+                    <h4 class="font-bold text-sm text-slate-800 mb-2">Productos Registrados</h4>
+                    <div id="admin-products-list" class="space-y-2">
+                        <!-- Lista dinámica -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LÓGICA JAVASCRIPT INTEGRADA -->
+    <script>
+        // ==========================================
+        // CONFIGURACIÓN DE JSONBIN
+        // ==========================================
+        const BIN_ID = "6aaea510ffd5d1605319a9a1";
+        const API_KEY = "$2a$10$1S.qtJVmmXqnFXhX2AsjUuyFwfabnb8BF0QZZmX8.R0ThT9mpD0ZK"; 
+        
+        let fallbackProducts = [
+            { id: 1, name: "Pan Piñita Tradicional", price: 1.00, category: "PANADERIA", image: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=500", description: "Suave y recién horneado." },
+            { id: 2, name: "Torta Tres Leches", price: 3.50, category: "PASTELERIA", image: "https://images.unsplash.com/photo-1464349095431-e9a21285b5f3?w=500", description: "Deliciosa porción bañada en tres leches." },
+            { id: 3, name: "Tequeños de Queso (5 un)", price: 2.50, category: "ANTOJOS", image: "", description: "Crujientes y rellenos de queso criollo." }
+        ];
+
+        let products = [];
+        let cart = [];
+        let currentFilter = 'todos';
+
+        async function loadProducts() {
+            try {
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': API_KEY }
+                });
+                let data = await response.json();
+                products = data.record.products || fallbackProducts;
+            } catch (error) {
+                console.error("Usando respaldo local:", error);
+                products = fallbackProducts;
+            }
+            renderCategories();
+            renderProducts();
+            renderAdminProducts();
+        }
+
+        async function saveProductsToCloud() {
+            try {
+                let response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': API_KEY
+                    },
+                    body: JSON.stringify({ products: products })
+                });
+                if (response.ok) {
+                    alert("¡Cambios guardados en la nube con éxito!");
+                    loadProducts();
+                } else {
+                    alert("Error al guardar en la nube.");
+                }
+            } catch (error) {
+                console.error("Error de red:", error);
+                alert("Error de conexión al guardar.");
+            }
+        }
+
+        function renderCategories() {
+            const container = document.getElementById('category-filters');
+            if (!container) return;
+
+            let categories = [...new Set(products.map(p => (p.category || 'GENERAL').toUpperCase()))];
+
+            let html = `<button onclick="filterCategory('todos')" class="cat-btn ${currentFilter === 'todos' ? 'bg-amber-700 text-white' : 'bg-white text-amber-800 border border-amber-200'} px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow transition">Todos</button>`;
+
+            categories.forEach(cat => {
+                let isActive = currentFilter === cat;
+                let btnClass = isActive ? 'bg-amber-700 text-white' : 'bg-white text-amber-800 border border-amber-200';
+                html += `<button onclick="filterCategory('${cat}')" class="cat-btn ${btnClass} px-4 py-2 rounded-xl text-sm font-bold whitespace-nowrap shadow-sm transition capitalize">${cat.toLowerCase()}</button>`;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('products-grid');
+            if (!grid) return;
+
+            let filtered = currentFilter === 'todos' ? products : products.filter(p => (p.category || '').toUpperCase() === currentFilter);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<p class="text-slate-500 col-span-full text-center py-8">No hay productos en esta categoría.</p>`;
+                return;
+            }
+
+            grid.innerHTML = filtered.map(p => `
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-amber-100 flex flex-col justify-between transition hover:shadow-lg">
+                    <div>
+                        ${p.image ? `<img src="${p.image}" alt="${p.name}" class="w-full h-48 object-cover">` : 
+                        `<div class="w-full h-48 bg-amber-100 flex flex-col items-center justify-center text-amber-800">
+                            <i class="fa-solid fa-bread-slice text-3xl mb-1 opacity-50"></i>
+                            <span class="text-xs font-bold opacity-60">Sin Imagen</span>
+                        </div>`}
+                        <div class="p-4">
+                            <span class="text-xs font-bold text-amber-700 uppercase tracking-wider">${p.category || 'General'}</span>
+                            <h3 class="font-bold text-lg text-slate-800 mt-1 mb-1">${p.name}</h3>
+                            <p class="text-slate-600 text-xs line-clamp-2">${p.description || ''}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0 flex items-center justify-between mt-2">
+                        <span class="text-xl font-black text-amber-900">$${Number(p.price).toFixed(2)}</span>
+                        <button onclick="addToCart(${p.id})" class="bg-amber-700 hover:bg-amber-800 text-white px-3 py-2 rounded-xl text-sm font-bold shadow transition flex items-center">
+                            <i class="fa-solid fa-plus mr-1"></i> Agregar
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            currentFilter = cat;
+            renderCategories();
+            renderProducts();
+        }
+
+        function toggleCart() {
+            document.getElementById('cart-modal').classList.toggle('hidden');
+        }
+
+        function toggleAddress() {
+            let method = document.getElementById('delivery-method').value;
+            let addressContainer = document.getElementById('address-container');
+            if (method === 'Delivery a Domicilio') {
+                addressContainer.classList.remove('hidden');
+            } else {
+                addressContainer.classList.add('hidden');
+            }
+        }
+
+        function addToCart(id) {
+            let prod = products.find(p => p.id === id);
+            if (!prod) return;
+            let existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...prod, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            let totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cart-counter').innerText = totalItems;
+
+            let container = document.getElementById('cart-items');
+            if (cart.length === 0) {
+                container.innerHTML = `<p class="text-slate-500 text-center py-8">Tu carrito está vacío</p>`;
+                document.getElementById('cart-total').innerText = '$0.00';
+                return;
+            }
+
+            container.innerHTML = cart.map(item => `
+                <div class="flex justify-between items-center bg-amber-50 p-3 rounded-xl border border-amber-200">
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">${item.name}</h4>
+                        <p class="text-xs text-amber-700">$${Number(item.price).toFixed(2)} c/u</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <button onclick="changeQty(${item.id}, -1)" class="bg-slate-200 px-2 py-1 rounded text-xs font-bold">-</button>
+                        <span class="text-sm font-bold">${item.qty}</span>
+                        <button onclick="changeQty(${item.id}, 1)" class="bg-slate-200 px-2 py-1 rounded text-xs font-bold">+</button>
+                    </div>
+                </div>
+            `).join('');
+
+            let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            document.getElementById('cart-total').innerText = `$${total.toFixed(2)}`;
+        }
+
+        function changeQty(id, delta) {
+            let item = cart.find(i => i.id === id);
+            if (!item) return;
+            item.qty += delta;
+            if (item.qty <= 0) {
+                cart = cart.filter(i => i.id !== id);
+            }
+            updateCartUI();
+        }
+
+        function sendWhatsAppOrder() {
+            let name = document.getElementById('client-name').value.trim();
+            let delivery = document.getElementById('delivery-method').value;
+            let address = document.getElementById('client-address').value.trim();
+            let payment = document.getElementById('payment-method').value;
+
+            if (!name) {
+                alert("Por favor ingresa tu nombre y apellido.");
+                return;
+            }
+            if (cart.length === 0) {
+                alert("Tu carrito está vacío.");
+                return;
+            }
+
+            let message = `🍞 *NUEVO PEDIDO - LA SAN CRISTÓBALENSE* 🍞\n\n`;
+            message += `👤 *Cliente:* ${name}\n`;
+            message += `🚚 *Método:* ${delivery}\n`;
+            if (delivery === 'Delivery a Domicilio') {
+                message += `📍 *Dirección:* ${address || 'No especificada'}\n`;
+            }
+            message += `💳 *Pago:* ${payment}\n\n`;
+            message += `🛒 *Detalle del pedido:*\n`;
+
+            cart.forEach(item => {
+                message += `- ${item.qty}x ${item.name} ($${(item.price * item.qty).toFixed(2)})\n`;
+            });
+
+            let total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+            message += `\n💰 *TOTAL A PAGAR:* $${total.toFixed(2)}`;
+
+            let phone = "584248787471";
+            let url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+            window.open(url, '_blank');
+        }
+
+        // ==========================================
+        // ATAJO SECRETO PARA ADMIN (Ctrl + Alt + A)
+        // ==========================================
+        window.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 'a') {
+                e.preventDefault();
+                openAdminLogin();
+            }
+        });
+
+        function openAdminLogin() {
+            let pass = prompt("Contraseña de Administrador:");
+            if (pass === "1234") {
+                document.getElementById('admin-modal').classList.remove('hidden');
+                renderAdminProducts();
+            } else if (pass !== null) {
+                alert("Contraseña incorrecta");
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('admin-modal').classList.add('hidden');
+            resetAdminForm();
+        }
+
+        function renderAdminProducts() {
+            const list = document.getElementById('admin-products-list');
+            if (!list) return;
+
+            if (products.length === 0) {
+                list.innerHTML = `<p class="text-slate-500 text-sm">No hay productos registrados.</p>`;
+                return;
+            }
+
+            list.innerHTML = products.map(p => `
+                <div class="flex justify-between items-center bg-white p-3 rounded-xl border border-amber-200 shadow-sm">
+                    <div class="flex items-center space-x-3">
+                        ${p.image ? `<img src="${p.image}" class="w-10 h-10 object-cover rounded-lg">` : 
+                        `<div class="w-10 h-10 bg-amber-100 flex items-center justify-center text-amber-800 rounded-lg text-xs font-bold">Sin foto</div>`}
+                        <div>
+                            <h5 class="font-bold text-sm text-slate-800">${p.name}</h5>
+                            <p class="text-xs text-amber-700">$${Number(p.price).toFixed(2)} - <span class="uppercase font-semibold">${p.category || 'General'}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="editProduct(${p.id})" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-3 py-1 rounded-lg text-xs font-bold">Editar</button>
+                        <button onclick="deleteProduct(${p.id})" class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded-lg text-xs font-bold">Eliminar</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Variable temporal para guardar la imagen seleccionada al editar o crear
+        let selectedImageBase64 = "";
+
+        document.getElementById('prod-img-file').addEventListener('change', function(e) {
+            let file = e.target.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(uploadEvent) {
+                    selectedImageBase64 = uploadEvent.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function saveProduct() {
+            let id = document.getElementById('edit-product-id').value;
+            let name = document.getElementById('prod-name').value.trim();
+            let price = parseFloat(document.getElementById('prod-price').value);
+            let category = document.getElementById('prod-cat').value.trim().toUpperCase() || 'GENERAL';
+            let description = document.getElementById('prod-desc').value.trim();
+
+            if (!name || isNaN(price)) {
+                alert("Por favor completa al menos el nombre y el precio.");
+                return;
+            }
+
+            if (id) {
+                let prod = products.find(p => p.id == id);
+                if (prod) {
+                    prod.name = name;
+                    prod.price = price;
+                    prod.category = category;
+                    // Si seleccionó una nueva foto la actualiza, si no, mantiene la que ya tenía (o se queda vacía si no tenía)
+                    if (selectedImageBase64) {
+                        prod.image = selectedImageBase64;
+                    }
+                    prod.description = description;
+                }
+            } else {
+                let newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                products.push({
+                    id: newId,
+                    name,
+                    price,
+                    category,
+                    image: selectedImageBase64 || "", // Si no sube ninguna, se guarda como vacío
+                    description
+                });
+            }
+
+            saveProductsToCloud();
+            resetAdminForm();
+        }
+
+        function editProduct(id) {
+            let p = products.find(prod => prod.id === id);
+            if (!p) return;
+
+            document.getElementById('edit-product-id').value = p.id;
+            document.getElementById('prod-name').value = p.name;
+            document.getElementById('prod-price').value = p.price;
+            document.getElementById('prod-cat').value = p.category || '';
+            document.getElementById('prod-desc').value = p.description || '';
+            selectedImageBase64 = p.image || ""; // Carga la imagen actual si la tiene
+            document.getElementById('admin-form-title').innerText = "Editar Producto";
+        }
+
+        function deleteProduct(id) {
+            if (confirm("¿Seguro que deseas eliminar este producto?")) {
+                products = products.filter(p => p.id !== id);
+                saveProductsToCloud();
+            }
+        }
+
+        function resetAdminForm() {
+            document.getElementById('edit-product-id').value = '';
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-price').value = '';
+            document.getElementById('prod-cat').value = '';
+            document.getElementById('prod-img-file').value = '';
+            document.getElementById('prod-desc').value = '';
+            selectedImageBase64 = "";
+            document.getElementById('admin-form-title').innerText = "Agregar Nuevo Producto";
+        }
+
+        // Inicializar al cargar
+        window.addEventListener('DOMContentLoaded', () => {
+            loadProducts();
+        });
+    </script>
+</body>
+</html>
